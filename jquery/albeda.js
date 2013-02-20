@@ -1,72 +1,87 @@
-//functions
-			// set the list selector
-			var setSelector = "#sortable";
-			// set the cookie name
-			var setCookieName = "listOrder";
-			// set the cookie expiry time (days):
-			var setCookieExpiry = 7;
-			 
-			// function that writes the list order to a cookie
-			function getOrder() {
-				// save custom order to cookie
-				$.cookie(setCookieName, $(setSelector).sortable("toArray"), { expires: setCookieExpiry, path: "/" });
+var baseurl = 'http://mobileconnectit.com/';
+
+$(function() {	
+	$.ajax({
+		url: baseurl + 'AlbedaWebApp?callback=?',
+		dataType: 'json',
+		jsonpCallback: 'sitedata', // specify the callback name if you're hard-coding it
+		timeout: 3000,
+		success: function(data){
+			parseData(data)},
+		error: function(){
+			if (localStorage.getItem('items')){	
+				localStorageSort();
+			} else {
+				$('#sortable').append('<div class="uitleg"><h2>LET OP!</h2><p>Je hebt op dit moment geen internetverbinding, waardoor de app niet goed geladen kan worden.</p></div>');
 			}
-			 
-			// function that restores the list order from a cookie
-			function restoreOrder() {
-				var list = $(setSelector);
-				if (list == null) return
-			 
-				// fetch the cookie value (saved order)
-				var cookie = $.cookie(setCookieName);
-				if (!cookie) return;
-			 
-				// make array from saved order
-				var IDs = cookie.split(",");
-			 
-				// fetch current order
-				var items = list.sortable("toArray");
-			 
-				// make array from current order
-				var rebuild = new Array();
-				for ( var v=0, len=items.length; v<len; v++ ){
-					rebuild[items[v]] = items[v];
+		}
+	});
+	
+	$('#sortable').sortable({
+		connectWith: '#sortable',
+		handle: '.handle',
+		cursor: 'move',
+		stop: function(event, ui) {
+			$(ui.item).find('.header').click();
+			var sortorder = '';
+
+			$('#sortable').each(function() {
+				var itemorder = $(this).sortable('toArray');
+				var columnId = $(this).attr('id');
+				sortorder +=  itemorder.toString();
+			});
+			
+			console.log('SortOrder: ' + sortorder);
+			//localStorage.setItem(JSON.stringify(sortorder).sortable);
+			localStorage.setItem("order" , sortorder);
+			//localStorage.getItem("sortables");
+		}
+	})
+	.disableSelection();
+	$( "#sortable" ).disableSelection();
+});	
+
+function parseData(data){
+	var y=[];
+	$.each(data.items, function(i,item){
+		var s ='';
+			s = s+'<div class="item" id="item'+i+'"><img class="sort handle" src="images/sort.png" alt=""/>';
+			s = s+'<img class="placeholder" src="'+item.img+'" alt=""/>'				
+			s = s+'<h2 class="titleItem">'+item.title+'</h2>'
+			s = s+'<p class="itemInfo">'+item.info+'</p>'
+			s = s+'<a href="'+item.link+'" class="button" target="_blank">Bezoek de site</a><div class="clear"></div></div>'
+			y[i]=s;
+		});
+		console.log(y.join('|'));
+		localStorage.setItem("items" , y.join('|'));
+	localStorageSort(); 
+};
+
+function localStorageSort() {
+	var y = localStorage.getItem("items").split('|'); 
+	var str = localStorage.getItem("order");
+	if (str) {
+		
+		
+			var col = str;
+			if (col.length > 0) {
+				var vals = col.split(',');
+				for (var j = 0; j < vals.length; ++j) {
+					console.log('appending ' + vals[j] + ' to #sortable');
+					$('#sortable').append(y[vals[j].substring(4,5)]);
 				}
-			 
-				for (var i = 0, n = IDs.length; i < n; i++) {
-			 
-					// item id from saved order
-					var itemID = IDs[i];
-			 
-					if (itemID in rebuild) {
-			 
-						// select item id from current order
-						var item = rebuild[itemID];
-			 
-						// select the item according to current order
-						var child = $("#sortable.ui-sortable").children("#" + item);
-			 
-						// select the item according to the saved order
-						var savedOrd = $("#sortable.ui-sortable").children("#" + itemID);
-			 
-						// remove all the items
-						child.remove();
-			 
-						// add the items in turn according to saved order
-						// we need to filter here since the "ui-sortable"
-						// class is applied to all ul elements and we
-						// only want the very first!  You can modify this
-						// to support multiple lists - not tested!
-						$("#sortable.ui-sortable").filter(":first").append(savedOrd);
-					}
+				if (y.length > vals.length)
+				{
+					for (var j = vals.length; j < y.length; ++j) {
+					console.log('appending item' + j + ' to #sortable' );
+					$('#sortable').append(y[j]);}
 				}
 			}
 		
-			$(function() {
-				$( "#sortable" ).sortable({
-					handle: ".handle",
-					update: function() { getOrder();}
-					});
-				$( "#sortable" ).disableSelection();
-				restoreOrder();
-			});
+	} 
+	else {
+		for (var i = 0; i < y.length; i++) {
+			$("#sortable").append(y[i]);
+		}
+	}
+}

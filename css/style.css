@@ -9,7 +9,7 @@ padding:0;}
 /*iPad Landscape */
 @media only screen and (min-width: 1000px) {
 	body{
-		background: url('../images/background.png');
+		background: url('../images/background_tablet.png') #c03a8f;
 		background-size: 100%;
 		background-repeat:no-repeat;
 		background-attachment:fixed;
@@ -99,7 +99,8 @@ padding:0;}
 		
 	.sort {
 		position: absolute;
-		margin: 5px 0 0 185px;
+		padding:10px;
+		margin: 0px 0 0 175px;
 		cursor:move;
 		}	
 		
@@ -180,7 +181,7 @@ padding:0;}
 /* iPad Portrait */
 @media only screen and (max-width:999px) {
 	body{
-		background: url('../images/background.png');
+		background: url('../images/background_tablet.png') #c03a8f;
 		background-repeat:no-repeat;
 		background-attachment:fixed;
 		text-align: center;}
@@ -258,7 +259,8 @@ padding:0;}
 		
 	.sort {
 		position: absolute;
-		margin: 5px 0 0 185px;
+		padding:10px;
+		margin: 0px 0 0 175px;
 		cursor:move;
 		}
 		
